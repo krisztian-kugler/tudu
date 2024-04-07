@@ -1,0 +1,92 @@
+:host,
+.tooltip {
+  display: grid;
+  align-items: center;
+  height: 48px;
+  padding: 0 12px;
+  border-radius: 6px;
+}
+
+:host {
+  position: relative;
+  grid-template-columns: 24px 1fr;
+  column-gap: 12px;
+  min-width: 48px;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 100ms ease-out;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-button-hover-background);
+  }
+}
+
+:host(.active):not(:hover) {
+  background-color: var(--color-link-active);
+}
+
+.icon {
+  align-self: center;
+  transition: stroke 100ms ease-out;
+
+  :host(.active):not(:hover) & {
+    stroke: var(--color-highlight);
+  }
+
+  :host:hover & {
+    stroke: var(--color-button-hover-text);
+  }
+}
+
+.text {
+  display: grid;
+  justify-items: start;
+  row-gap: 4px;
+  white-space: nowrap;
+  overflow-x: hidden;
+  transition: color 100ms ease-out;
+
+  :host(.active):not(:hover) & {
+    color: var(--color-highlight);
+  }
+
+  :host:hover & {
+    color: var(--color-button-hover-text);
+  }
+}
+
+.title {
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: var(--z-index-tooltip);
+  left: calc(100% + 16px);
+  justify-items: start;
+  align-content: center;
+  row-gap: 4px;
+  background-color: var(--color-link-active);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 100ms ease-out;
+  pointer-events: none;
+
+  &:before {
+    content: "";
+    position: absolute;
+    right: 100%;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid var(--color-link-active);
+  }
+
+  :host(.compact):hover & {
+    opacity: 1;
+  }
+}

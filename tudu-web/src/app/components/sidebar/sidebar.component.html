@@ -1,0 +1,41 @@
+<header>
+  <h2 class="logo">Td</h2>
+</header>
+<nav class="navigation">
+  @for (link of navigationLinks; track link.label) {
+  <a
+    tudu-sidebar-button
+    [icon]="link.icon"
+    [label]="link.label"
+    [compact]="compact"
+    [routerLink]="link.path"
+    routerLinkActive="active"
+  ></a>
+  }
+</nav>
+<footer class="footer">
+  <button
+    tudu-sidebar-button
+    icon="sidebar"
+    buttonTitle="Sidebar"
+    [label]="'sidebarAppearance.' + (compact ? 'compact' : 'default') | translate"
+    [compact]="compact"
+    (click)="toggleAppearance()"
+  ></button>
+  <button
+    tudu-sidebar-button
+    [icon]="theme!.icon"
+    buttonTitle="Theme"
+    [label]="'theme.' + theme!.name | translate"
+    [compact]="compact"
+    (click)="themeService.toggleTheme()"
+  ></button>
+  <button
+    tudu-sidebar-button
+    icon="user"
+    buttonTitle="User"
+    label="Krisztian Kugler"
+    [compact]="compact"
+    (click)="toggleUserMenu()"
+  ></button>
+</footer>

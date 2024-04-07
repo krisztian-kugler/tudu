@@ -1,0 +1,17 @@
+:host {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 4px;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: var(--color-background);
+}
+
+.column {
+  width: 16px;
+  height: 48px;
+  background-color: var(--color-link-active);
+}

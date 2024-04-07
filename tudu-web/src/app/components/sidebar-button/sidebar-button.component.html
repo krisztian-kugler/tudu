@@ -1,0 +1,17 @@
+<svg tudu-icon class="icon" [name]="icon"></svg>
+@if (!compact) {
+<div class="text">
+  <ng-container *ngTemplateOutlet="text" />
+</div>
+} @else {
+<div class="tooltip">
+  <ng-container *ngTemplateOutlet="text" />
+</div>
+}
+
+<ng-template #text>
+  @if (title) {
+  <span class="title">{{ title }}</span>
+  }
+  {{ label }}
+</ng-template>

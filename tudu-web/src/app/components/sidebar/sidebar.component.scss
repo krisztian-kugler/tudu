@@ -1,0 +1,40 @@
+:host {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: inherit;
+  padding: 24px;
+  border-right: 1px solid var(--color-border);
+  transition: width 200ms ease-out;
+  overflow-x: hidden;
+
+  &[data-appearance="default"] {
+    width: 288px;
+  }
+
+  &[data-appearance="compact"] {
+    width: 96px;
+  }
+
+  &.compact {
+    overflow-x: initial;
+  }
+}
+
+.logo {
+  color: var(--color-button-hover-text);
+  min-width: 48px;
+}
+
+.navigation,
+.footer {
+  display: grid;
+  row-gap: 8px;
+}
+
+.navigation {
+  align-self: center;
+}
+
+.footer {
+  align-self: end;
+}

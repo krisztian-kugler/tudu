@@ -1,0 +1,77 @@
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/Montserrat-Variable.woff2") format("woff2") tech("variations");
+  src: url("./assets/fonts/Montserrat-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/fonts/Montserrat-Italic-Variable.woff2") format("woff2") tech("variations");
+  src: url("./assets/fonts/Montserrat-Italic-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+:root {
+  --z-index-draggable: 1;
+  --z-index-tooltip: 3;
+
+  &[data-theme="light"] {
+    --color-background: rgb(245, 245, 245);
+    --color-text: rgb(60, 60, 60);
+    --color-border: rgb(218, 218, 218);
+    --color-button-hover-background: rgb(181, 234, 221);
+    --color-button-hover-text: rgb(30, 100, 82);
+    --color-link-active: rgb(222, 222, 222);
+    --color-highlight: rgb(0, 0, 0);
+  }
+
+  &[data-theme="dark"] {
+    --color-background: rgb(30, 30, 30);
+    --color-text: rgb(200, 200, 200);
+    --color-border: rgb(60, 60, 60);
+    --color-button-hover-background: rgb(36, 59, 53);
+    --color-button-hover-text: rgb(125, 255, 220);
+    --color-link-active: rgb(48, 48, 48);
+    --color-highlight: rgb(255, 255, 255);
+  }
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: "Montserrat", sans-serif;
+  font-weight: 400;
+  transition: background-color 100ms ease-out;
+
+  &[dragging] {
+    cursor: grabbing;
+  }
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  outline: none;
+  border: none;
+  background-color: transparent;
+  font-family: "Montserrat", sans-serif;
+}
+
+router-outlet {
+  display: none;
+}
+
+[tududraggable] {
+  cursor: grab;
+}

@@ -1,0 +1,10 @@
+{
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "sidebarAppearance": {
+    "default": "Default",
+    "compact": "Compact"
+  }
+}
