@@ -1,4 +1,4 @@
-import { AfterContentInit, ContentChildren, Directive, ElementRef, QueryList } from "@angular/core";
+import { Directive, ElementRef, contentChildren, effect } from "@angular/core";
 import { Subscription } from "rxjs";
 
 import { DraggableDirective } from "../draggable/draggable.directive";
@@ -10,24 +10,33 @@ type Boundaries = {
   maxY: number;
 };
 
-const defaultBoundaries: Boundaries = {
-  minX: NaN,
-  maxX: NaN,
-  minY: NaN,
-  maxY: NaN,
-};
-
 @Directive({
   selector: "[tuduDragArea]",
   standalone: true,
 })
-export class DragAreaDirective implements AfterContentInit {
-  @ContentChildren(DraggableDirective, { descendants: true }) private draggables?: QueryList<DraggableDirective>;
-
-  private boundaries: Boundaries = defaultBoundaries;
+export class DragAreaDirective {
+  private draggables = contentChildren(DraggableDirective, { descendants: true });
   private subscriptions: Subscription[] = [];
+  private boundaries: Boundaries = {
+    minX: NaN,
+    maxX: NaN,
+    minY: NaN,
+    maxY: NaN,
+  };
 
-  constructor(private host: ElementRef<HTMLElement>) {}
+  constructor(private host: ElementRef<HTMLElement>) {
+    effect((onCleanup) => {
+      this.subscriptions = this.draggables().reduce((subs, draggable) => {
+        subs.push(
+          draggable.dragStart.subscribe(() => this.calculateBoundaries(draggable)),
+          draggable.dragMove.subscribe(() => this.restrictDraggableMovement(draggable))
+        );
+        return subs;
+      }, [] as Subscription[]);
+
+      onCleanup(() => this.subscriptions.forEach((subscription) => subscription.unsubscribe()));
+    });
+  }
 
   private calculateBoundaries(draggable: DraggableDirective) {
     const hostRect: DOMRect = this.host.nativeElement.getBoundingClientRect();
@@ -46,21 +55,5 @@ export class DragAreaDirective implements AfterContentInit {
       x: Math.min(this.boundaries.maxX, Math.max(this.boundaries.minX, draggable.movePosition.x)),
       y: Math.min(this.boundaries.maxY, Math.max(this.boundaries.minY, draggable.movePosition.y)),
     };
-  }
-
-  ngAfterContentInit() {
-    this.draggables?.changes.subscribe(() => {
-      this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-      this.subscriptions = [];
-
-      this.draggables?.forEach((draggable) => {
-        this.subscriptions.push(
-          draggable.dragStart.subscribe(() => this.calculateBoundaries(draggable)),
-          draggable.dragMove.subscribe(() => this.restrictDraggableMovement(draggable))
-        );
-      });
-    });
-
-    this.draggables?.notifyOnChanges();
   }
 }
