@@ -1,0 +1,9 @@
+@if (loading()) {
+<span>loading</span>
+} @else { @if (leadingIcon()) {
+<svg tudu-icon class="icon" [name]="leadingIcon()!"></svg>
+}
+<ng-content></ng-content>
+@if (trailingIcon()) {
+<svg tudu-icon class="icon" [name]="trailingIcon()!"></svg>
+} }

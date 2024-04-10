@@ -1,0 +1,32 @@
+:host {
+  display: grid;
+  grid-auto-flow: column;
+  column-gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background-color: var(--color-link-active);
+  color: white;
+  font-family: "Montserrat", sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.primary {
+    background-color: blue;
+  }
+
+  &.secondary {
+    background-color: green;
+  }
+
+  &.tertiary {
+    background-color: yellowgreen;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
