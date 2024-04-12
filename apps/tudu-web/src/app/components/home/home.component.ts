@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, TemplateRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-import { ModalService } from "src/app/services/modal/modal.service";
 import { ButtonComponent } from "../button/button.component";
+import { ModalService } from "src/app/services/modal/modal.service";
+import { NotificationService } from "src/app/services/notification/notification.service";
 
 @Component({
   selector: "tudu-home",
@@ -13,9 +14,16 @@ import { ButtonComponent } from "../button/button.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
-  constructor(private modalService: ModalService) {}
+  constructor(
+    private modalService: ModalService,
+    private notificationService: NotificationService
+  ) {}
 
   openModal(contentTemplate: TemplateRef<any>) {
     this.modalService.open(contentTemplate, { title: "Modal title" });
+  }
+
+  openNotification(message: string | TemplateRef<any>) {
+    this.notificationService.create(message);
   }
 }

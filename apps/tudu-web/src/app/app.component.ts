@@ -7,12 +7,13 @@ import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { ThemeService } from "./services/theme/theme.service";
 import { BrowserStorageService } from "./services/browser-storage/browser-storage.service";
 import { ModalService } from "./services/modal/modal.service";
+import { NotificationService } from "./services/notification/notification.service";
 
 @Component({
   selector: "tudu-root",
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent],
-  providers: [ThemeService, BrowserStorageService, ModalService],
+  providers: [ThemeService, BrowserStorageService, ModalService, NotificationService],
   template: `
     <tudu-sidebar />
     <router-outlet />
