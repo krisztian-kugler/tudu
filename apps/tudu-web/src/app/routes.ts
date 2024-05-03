@@ -13,17 +13,22 @@ export const routes: Routes = [
   {
     path: "board",
     title: getTitle("Board"),
-    loadComponent: () => import("./components/board/board.component").then((mod) => mod.BoardComponent),
+    loadComponent: () => import("./components/board/board.component").then((m) => m.BoardComponent),
   },
   {
     path: "backlog",
     title: getTitle("Backlog"),
-    loadComponent: () => import("./components/backlog/backlog.component").then((mod) => mod.BacklogComponent),
+    loadComponent: () => import("./components/backlog/backlog.component").then((m) => m.BacklogComponent),
   },
   {
     path: "calendar",
     title: getTitle("Calendar"),
-    loadComponent: () => import("./components/calendar/calendar.component").then((mod) => mod.CalendarComponent),
+    loadComponent: () => import("./components/calendar/calendar.component").then((m) => m.CalendarComponent),
+  },
+  {
+    path: "settings",
+    title: getTitle("Settings"),
+    loadComponent: () => import("./components/settings/settings.component").then((m) => m.SettingsComponent),
   },
   {
     path: "",
