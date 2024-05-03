@@ -1,18 +1,8 @@
 <h1 class="heading">Welcome back, <span class="user">Krisztian</span></h1>
 <p>Check out the latest activities and events.</p>
 <button (click)="openModal(modalTemplate)">Open modal</button>
-<button tudu-button variant="primary" trailingIcon="clock" (click)="openModal(modalTemplate)" disabled>
-  Open modal
-</button>
-<button
-  tudu-button
-  variant="secondary"
-  leadingIcon="calendar"
-  trailingIcon="clock"
-  (click)="openNotification('modalTemplate')"
->
-  Open notification
-</button>
+<button tudu-button variant="primary" (click)="openModal(modalTemplate)">Open modal</button>
+<button tudu-button variant="secondary" (click)="openNotification('modalTemplate')">Open notification</button>
 <button tudu-button variant="tertiary" loading leadingIcon="calendar" (click)="openModal(modalTemplate)">
   Open modal
 </button>

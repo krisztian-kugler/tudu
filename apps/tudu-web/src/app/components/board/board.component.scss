@@ -27,7 +27,7 @@
   height: fit-content;
   min-height: 100%;
   padding: 0 48px;
-  border: 1px dashed var(--color-button-hover-text);
+  // border: 1px dashed var(--color-button-hover-text);
 
   &:before,
   &:after {
@@ -36,8 +36,8 @@
     z-index: 2;
     display: block;
     width: 48px;
-    background-color: var(--color-background);
-    background-color: green;
+    //background-color: var(--color-background);
+    //background-color: green;
   }
 
   &:before {
@@ -58,8 +58,11 @@
   align-items: center;
   width: 150px;
   height: 100px;
+  border-radius: 4px;
   background-color: var(--color-button-hover-text);
-  color: var(--color-button-hover-background);
+  background-color: var(--color-ticket-background);
+  color: var(--color-text);
+  box-shadow: 0px 1px 2px 1px rgba(0, 0, 0, 0.15);
   font-size: 32px;
   font-weight: 600;
 }
@@ -70,7 +73,8 @@
   align-content: start;
   row-gap: 16px;
   padding: 16px;
-  background-color: var(--color-button-hover-background);
+  border-radius: 8px;
+  background-color: var(--color-droplist-background);
 
   &:not(:last-child) {
     margin-right: 16px;

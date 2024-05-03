@@ -16,6 +16,7 @@ import { NotificationService } from "./services/notification/notification.servic
   providers: [ThemeService, BrowserStorageService, ModalService, NotificationService],
   template: `
     <tudu-sidebar />
+    <header>Header</header>
     <router-outlet />
   `,
   styles: [
@@ -23,8 +24,14 @@ import { NotificationService } from "./services/notification/notification.servic
       :host {
         display: grid;
         grid-template-columns: auto 1fr;
-        grid-template-rows: 1fr;
+        grid-template-rows: auto 1fr;
         height: 100vh;
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        height: 64px;
       }
     `,
   ],

@@ -16,26 +16,34 @@
 <footer class="footer">
   <button
     tudu-sidebar-button
+    [icon]="(themeService.theme$ | async) === 'light' ? 'sun' : 'moon'"
+    buttonTitle="Theme"
+    [label]="'theme.' + (themeService.theme$ | async) | translate"
+    [compact]="compact"
+    (click)="themeService.toggle()"
+  ></button>
+  <button
+    tudu-sidebar-button
     icon="sidebar"
     buttonTitle="Sidebar"
     [label]="'sidebarAppearance.' + (compact ? 'compact' : 'default') | translate"
     [compact]="compact"
     (click)="toggleAppearance()"
   ></button>
-  <button
+  <a
     tudu-sidebar-button
-    [icon]="theme!.icon"
-    buttonTitle="Theme"
-    [label]="'theme.' + theme!.name | translate"
+    icon="settings"
+    label="Settings"
     [compact]="compact"
-    (click)="themeService.toggleTheme()"
-  ></button>
-  <button
+    routerLink="settings"
+    routerLinkActive="active"
+  ></a>
+  <!-- <button
     tudu-sidebar-button
     icon="user"
     buttonTitle="User"
     label="Krisztian Kugler"
     [compact]="compact"
     (click)="toggleUserMenu()"
-  ></button>
+  ></button> -->
 </footer>

@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, HostBinding, HostListener, OnDestroy, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, HostBinding, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { TranslateModule } from "@ngx-translate/core";
-import { Subscription } from "rxjs";
 
 import { IconComponent } from "../icon/icon.component";
 import { IconName } from "src/provide-icons";
@@ -18,11 +17,6 @@ type NavigationLink = {
   path: string;
 };
 
-const mapThemeToIcon: Record<Theme, IconName> = {
-  light: "sun",
-  dark: "moon",
-};
-
 @Component({
   selector: "tudu-sidebar",
   standalone: true,
@@ -31,12 +25,14 @@ const mapThemeToIcon: Record<Theme, IconName> = {
   styleUrls: ["./sidebar.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent {
   @HostBinding("attr.data-appearance") appearance: SidebarAppearance = "default";
   @HostBinding("class.compact") compact: boolean = false;
 
-  theme?: { name: Theme; icon: IconName };
-  themeChangeSub?: Subscription;
+  mapThemeToIcon: Record<Theme, IconName> = {
+    light: "sun",
+    dark: "moon",
+  };
 
   navigationLinks: NavigationLink[] = [
     {
@@ -53,6 +49,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: "Backlog",
       icon: "file-text",
       path: "/backlog",
+    },
+    {
+      label: "Timeline",
+      icon: "clock",
+      path: "/timeline",
     },
     {
       label: "Calendar",
@@ -84,15 +85,5 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   toggleUserMenu() {
     console.log("toggle user menu");
-  }
-
-  ngOnInit() {
-    this.themeChangeSub = this.themeService.themeChange$.subscribe((value) => {
-      this.theme = { name: value, icon: mapThemeToIcon[value] };
-    });
-  }
-
-  ngOnDestroy() {
-    this.themeChangeSub?.unsubscribe();
   }
 }

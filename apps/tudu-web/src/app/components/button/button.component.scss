@@ -6,7 +6,6 @@
   min-height: 48px;
   padding: 0 16px;
   border-radius: 4px;
-  background-color: var(--color-link-active);
   color: white;
   font-family: "Montserrat", sans-serif;
   font-size: 16px;
@@ -14,11 +13,13 @@
   cursor: pointer;
 
   &.primary {
-    background-color: blue;
+    background-color: var(--color-button-hover-text);
+    color: var(--color-button-hover-background);
   }
 
   &.secondary {
-    background-color: green;
+    border: 2px solid rgb(128, 128, 128);
+    color: rgb(128, 128, 128);
   }
 
   &.tertiary {
