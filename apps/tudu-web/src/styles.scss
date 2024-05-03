@@ -19,25 +19,31 @@
   --z-index-tooltip: 3;
 
   &[data-theme="light"] {
-    --color-background: rgb(245, 245, 245);
+    --color-background: rgb(250, 250, 250);
     --color-text: rgb(60, 60, 60);
     --color-border: rgb(218, 218, 218);
     --color-button-hover-background: rgb(181, 234, 221);
     --color-button-hover-text: rgb(30, 100, 82);
     --color-link-active: rgb(222, 222, 222);
     --color-highlight: rgb(0, 0, 0);
+    --color-droplist-background: rgb(233, 233, 233);
+    --color-ticket-background: rgb(255, 255, 255);
   }
 
   &[data-theme="dark"] {
-    --color-background: rgb(30, 30, 30);
+    --color-background: rgb(40, 40, 40);
     --color-text: rgb(200, 200, 200);
     --color-border: rgb(60, 60, 60);
     --color-button-hover-background: rgb(36, 59, 53);
     --color-button-hover-text: rgb(125, 255, 220);
     --color-link-active: rgb(48, 48, 48);
     --color-highlight: rgb(255, 255, 255);
+    --color-droplist-background: rgb(30, 30, 30);
+    --color-ticket-background: rgb(48, 48, 48);
   }
 }
+
+// Add selectable accent color next to light/dark mode (4-5 with predefined colors)
 
 * {
   padding: 0;
