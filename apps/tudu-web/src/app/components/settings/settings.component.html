@@ -1,0 +1,9 @@
+<h1 class="heading">Settings</h1>
+<nav class="navigation">
+  @for (link of navItems; track link.label) {
+  <a [routerLink]="link.path">
+    {{ link.label }}
+  </a>
+  }
+</nav>
+<div class="content">Content</div>

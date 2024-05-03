@@ -1,0 +1,24 @@
+:host {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-template-rows: auto 1fr;
+  align-content: start;
+  row-gap: 32px;
+  column-gap: 32px;
+  padding: 32px;
+  height: 100%;
+}
+
+.heading {
+  grid-column: 1 / span 2;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+}
+
+.content {
+}
