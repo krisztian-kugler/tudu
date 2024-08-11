@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 import { MinimapComponent } from "../minimap/minimap.component";
-import { DraggableDirective } from "src/app/directives/draggable/draggable.directive";
-import { DropListDirective } from "src/app/directives/drop-list/drop-list.directive";
-import { DragAreaDirective } from "src/app/directives/drag-area/drag-area.directive";
+import { DraggableDirective } from "src/app/shared/features/drag-drop/draggable.directive";
 import { AutoScrollDirective } from "src/app/directives/auto-scroll/auto-scroll.directive";
-import { DragAndDropService } from "src/app/services/drag-and-drop/drag-and-drop.service";
 import { moveItemInArray } from "src/utils/array";
+import {
+  DragAndDropService,
+  DragAreaDirective,
+  DropListDirective,
+  DropListGroupDirective,
+} from "src/app/shared/features/drag-drop";
 
 type Ticket = number;
 
@@ -19,9 +22,11 @@ type Ticket = number;
     MinimapComponent,
     DraggableDirective,
     DropListDirective,
+    DropListGroupDirective,
     DragAreaDirective,
     AutoScrollDirective,
   ],
+  providers: [DragAndDropService],
   templateUrl: "./board.component.html",
   styleUrls: ["./board.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,14 +75,14 @@ export class BoardComponent {
     [21, 22, 23],
   ];
 
-  constructor(public dragAndDropService: DragAndDropService) {}
-
-  ticketTrackBy(_: number, ticket: Ticket): number {
-    return ticket;
-  }
+  constructor(private dragAndDropService: DragAndDropService) {}
 
   onDrop({ fromIndex, toIndex }: any) {
     console.log(fromIndex, toIndex);
-    moveItemInArray(this.board[2], fromIndex, toIndex);
+    // moveItemInArray(this.board[3], 0, 3);
+  }
+
+  test(event: any) {
+    console.log(event);
   }
 }

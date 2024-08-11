@@ -59,6 +59,7 @@ body {
   transition: background-color 100ms ease-out;
 
   &[dragging] {
+    user-select: none;
     cursor: grabbing;
   }
 }

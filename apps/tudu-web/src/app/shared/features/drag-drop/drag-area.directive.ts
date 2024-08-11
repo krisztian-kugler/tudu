@@ -1,7 +1,7 @@
 import { Directive, ElementRef, contentChildren, effect } from "@angular/core";
 import { Subscription } from "rxjs";
 
-import { DraggableDirective } from "../draggable/draggable.directive";
+import { DraggableDirective } from "./draggable.directive";
 
 type Boundaries = {
   minX: number;
@@ -27,10 +27,6 @@ export class DragAreaDirective {
   constructor(private host: ElementRef<HTMLElement>) {
     effect((onCleanup) => {
       this.subscriptions = this.draggables().reduce((subs, draggable) => {
-        subs.push(
-          draggable.dragStart.subscribe(() => this.calculateBoundaries(draggable)),
-          draggable.dragMove.subscribe(() => this.restrictDraggableMovement(draggable))
-        );
         return subs;
       }, [] as Subscription[]);
 
@@ -38,9 +34,9 @@ export class DragAreaDirective {
     });
   }
 
-  private calculateBoundaries(draggable: DraggableDirective) {
+  /* private calculateBoundaries(draggable: DraggableDirective) {
     const hostRect: DOMRect = this.host.nativeElement.getBoundingClientRect();
-    const draggableRect: DOMRect = draggable.host.nativeElement.getBoundingClientRect();
+    const draggableRect: DOMRect = draggable.getRootElement().getBoundingClientRect();
 
     this.boundaries = {
       minX: hostRect.left - draggableRect.left + draggable.movePosition.x,
@@ -51,9 +47,9 @@ export class DragAreaDirective {
   }
 
   private restrictDraggableMovement(draggable: DraggableDirective) {
-    draggable.movePosition = {
-      x: Math.min(this.boundaries.maxX, Math.max(this.boundaries.minX, draggable.movePosition.x)),
-      y: Math.min(this.boundaries.maxY, Math.max(this.boundaries.minY, draggable.movePosition.y)),
-    };
-  }
+    draggable.setPosition(
+      Math.min(this.boundaries.maxX, Math.max(this.boundaries.minX, draggable.movePosition.x)),
+      Math.min(this.boundaries.maxY, Math.max(this.boundaries.minY, draggable.movePosition.y)),
+    );
+  } */
 }

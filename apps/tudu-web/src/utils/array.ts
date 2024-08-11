@@ -7,3 +7,14 @@ export const moveItemInArray = <T>(arr: T[], fromIndex: number, toIndex: number)
   arr.splice(toIndex, 0, itemToMove);
   return arr;
 };
+
+export const removeItemFromArray = <T>(arr: T[], index: number): T[] => {
+  if (index < 0 || index >= arr.length) {
+    console.error("Invalid index");
+    return arr;
+  }
+  arr.splice(index, 1);
+  return arr;
+};
+
+export const transferItemBetweenArrays = () => {};

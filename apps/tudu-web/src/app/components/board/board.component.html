@@ -1,18 +1,12 @@
 <header class="header">
   <h1 class="heading">Board</h1>
 </header>
-<main
-  class="board-container"
-  tuduDragArea
-  [tuduAutoScroll]="dragAndDropService.isDragging$ | async"
-  [tuduAutoScrollUnit]="2"
-  [tuduAutoScrollSpeedZones]="4"
->
-  <div class="board">
+<main class="board-container">
+  <div class="board" tuduDropListGroup>
     @for (column of board; track $index) {
-    <div class="drop-list" tuduDropList (tuduDropListDrop)="onDrop($event)">
+    <div class="drop-list" tuduDropList tuduDraggable (tuduDropListDrop)="onDrop($event)">
       @for (ticket of column; track ticket) {
-      <div class="draggable" tuduDraggable>
+      <div class="draggable" tuduDraggable (tuduDropListEnter)="test($event)">
         {{ ticket }}
       </div>
       } @empty {
