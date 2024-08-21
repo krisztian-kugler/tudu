@@ -2,12 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostListener,
-  Input,
-  Output,
+  input,
+  output,
   Renderer2,
-  ViewChild,
+  viewChild,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
@@ -22,12 +21,12 @@ import { IconComponent } from "../icon/icon.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalComponent {
-  @Input() title?: string;
+  title = input<string>();
 
-  @Output() closeStartEvent = new EventEmitter<ModalComponent>();
-  @Output() closeEndEvent = new EventEmitter<ModalComponent>();
+  closeStartEvent = output<ModalComponent>();
+  closeEndEvent = output<ModalComponent>();
 
-  @ViewChild("modal") modal?: ElementRef<HTMLDivElement>;
+  modal = viewChild<ElementRef<HTMLDivElement>>("modal");
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -44,8 +43,8 @@ export class ModalComponent {
   }
 
   close() {
-    this.closeStartEvent.emit();
+    this.closeStartEvent.emit(this);
     this.renderer.addClass(this.host.nativeElement, "fadeOut");
-    this.renderer.addClass(this.modal?.nativeElement, "zoomOut");
+    this.renderer.addClass(this.modal()?.nativeElement, "zoomOut");
   }
 }

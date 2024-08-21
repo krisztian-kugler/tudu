@@ -43,7 +43,8 @@ export class ModalService {
       projectableNodes: [contentView.rootNodes],
     });
 
-    this.modalComponent.instance.title = options?.title;
+    if (options?.title) this.modalComponent.setInput("title", options.title);
+
     this.modalComponent.instance.closeStartEvent.subscribe(() => this.close());
     this.modalComponent.instance.closeEndEvent.subscribe(() => this.destroy());
 

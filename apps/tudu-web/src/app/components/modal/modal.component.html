@@ -1,7 +1,7 @@
 <div class="modal" #modal>
   <header class="header">
-    @if (title) {
-    <h2>{{ title }}</h2>
+    @if (title()) {
+      <h2>{{ title() }}</h2>
     }
     <svg tudu-icon class="close" name="x" (click)="close()"></svg>
   </header>
