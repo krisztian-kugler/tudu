@@ -37,7 +37,7 @@ export class DragAndDropService {
     fromEvent<PointerEvent>(this.document, "pointermove")
       .pipe(
         takeWhile(() => this.isDragging$.value),
-        tap(this.setLastPointerMoveEvent)
+        tap((event) => this.setLastPointerMoveEvent(event))
       )
       .subscribe((event) => this.pointerMove$.next(event));
 
