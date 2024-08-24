@@ -1,12 +1,12 @@
 import { DOCUMENT } from "@angular/common";
 import { Directive, ElementRef, HostListener, inject, Renderer2 } from "@angular/core";
-import { Subscription } from "rxjs";
+import { map, pluck, scan, startWith, Subscription } from "rxjs";
 
 import { DragAndDropService } from "./drag-and-drop.service";
 import { DropListDirective } from "./drop-list.directive";
 import { ANIMATION_DURATION } from "./utils";
 
-import type { Position, BoundingRectDistance } from "./types";
+import type { Position, BoundingRectDistance, ScrollPosition } from "./types";
 
 @Directive({
   selector: "[tuduDraggable]",
@@ -115,15 +115,13 @@ export class DraggableDirective {
 
     if (this.dropList) {
       this.dropList.endDragSequence();
-      this.animatePreviewToPlaceholder(this.dropList).then(() => {
+      this.animatePreviewToPlaceholder().then(() => {
         this.renderer.insertBefore(this.sourceDropList!.getRootElement(), this.getRootElement(), this.anchor);
         this.renderer.removeChild(this.sourceDropList!.getRootElement(), this.anchor);
-        this.resetPosition();
         this.anchor = null;
         this.dropList!.drop(this.sourceDropList!);
         this.dropList = this.sourceDropList;
         this.dropList!.reset();
-        this.resetPosition();
         this.dragAndDropService.stopDragging();
       });
     } else {
@@ -155,65 +153,79 @@ export class DraggableDirective {
     this.dropList.sortDraggables(this, x, y);
   }
 
-  private cacheScrollableAncestors() {
-    this.scrollableAncestors.clear();
-    let currentElement: HTMLElement | null = this.dropList!.getRootElement();
+  private getScrollableAncestors(): Map<HTMLElement, ScrollPosition> {
+    const scrollableAncestors = new Map<HTMLElement, ScrollPosition>();
+    let element: HTMLElement | null = this.dropList!.getRootElement();
 
-    while (currentElement) {
-      if (
-        currentElement.scrollWidth > currentElement.clientWidth ||
-        currentElement.scrollHeight > currentElement.clientHeight
-      ) {
-        this.scrollableAncestors.set(currentElement, {
-          scrollTop: currentElement.scrollTop,
-          scrollLeft: currentElement.scrollLeft,
-        });
+    while (element) {
+      if (element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight) {
+        const { scrollTop, scrollLeft } = element;
+        scrollableAncestors.set(element, { scrollTop, scrollLeft });
       }
-      currentElement = currentElement.parentElement;
+      element = element.parentElement;
     }
 
-    console.log(this.scrollableAncestors);
+    return scrollableAncestors;
   }
 
-  private animatePreviewToPlaceholder(dropList: DropListDirective): Promise<void> {
-    this.cacheScrollableAncestors();
-    const scrollSubscription = this.dragAndDropService.scroll$.subscribe((event) => {
-      const scrolledElement = event.target as HTMLElement;
-      const currentScrollPosition = this.scrollableAncestors.get(scrolledElement);
-      const newScrollPosition = { scrollTop: scrolledElement.scrollTop, scrollLeft: scrolledElement.scrollLeft };
-      const scrollDelta = {
-        scrollTop: -(newScrollPosition.scrollTop - (currentScrollPosition?.scrollTop || 0)),
-        scrollLeft: -(newScrollPosition.scrollLeft - (currentScrollPosition?.scrollLeft || 0)),
-      };
-      const visibleElement = this.getVisibleElement();
-      this.renderer.setStyle(
-        visibleElement,
-        "top",
-        `${parseFloat(getComputedStyle(visibleElement).top) + scrollDelta.scrollTop}px`
-      );
-      this.renderer.setStyle(
-        visibleElement,
-        "left",
-        `${parseFloat(getComputedStyle(visibleElement).left) + scrollDelta.scrollLeft}px`
-      );
-      this.scrollableAncestors.set(scrolledElement, {
-        scrollTop: scrolledElement.scrollTop,
-        scrollLeft: scrolledElement.scrollLeft,
+  /** Calculate the position on the viewport where the active draggable has to be moved after drop */
+  private getDropPosition() {
+    const placeholderRect: DOMRect = this.dropList!.getPlaceholderRect()!;
+    return { top: placeholderRect.top - this.dropList!.getHeightDiff(), left: placeholderRect.left };
+  }
+
+  private listenToScrollDuringAnimation(dropPosition: { top: number; left: number }) {
+    const scrollableAncestors = this.getScrollableAncestors();
+
+    return this.dragAndDropService.scroll$
+      .pipe(
+        scan(
+          ({ scrollableAncestors, dropPosition }, event) => {
+            const scrolledElement = event.target as HTMLElement;
+            const oldScrollPosition = scrollableAncestors.get(scrolledElement);
+
+            if (!oldScrollPosition) return { scrollableAncestors, dropPosition };
+
+            const delta: ScrollPosition = {
+              scrollTop: -(scrolledElement.scrollTop - oldScrollPosition.scrollTop),
+              scrollLeft: -(scrolledElement.scrollLeft - oldScrollPosition.scrollLeft),
+            };
+
+            const newDropPosition = {
+              top: dropPosition.top + delta.scrollTop,
+              left: dropPosition.left + delta.scrollLeft,
+            };
+
+            scrollableAncestors.set(scrolledElement, {
+              scrollTop: scrolledElement.scrollTop,
+              scrollLeft: scrolledElement.scrollLeft,
+            });
+
+            return { scrollableAncestors, dropPosition: newDropPosition };
+          },
+          { scrollableAncestors, dropPosition }
+        ),
+        map(({ dropPosition }) => dropPosition)
+      )
+      .subscribe(({ top, left }) => {
+        const visibleElement = this.getVisibleElement();
+        this.renderer.setStyle(visibleElement, "top", `${top}px`);
+        this.renderer.setStyle(visibleElement, "left", `${left}px`);
       });
-    });
+  }
+
+  private animatePreviewToPlaceholder(): Promise<void> {
+    const dropPosition = this.getDropPosition();
+    const scrollSubscription = this.listenToScrollDuringAnimation(dropPosition);
+
+    const visibleElement: HTMLElement = this.getVisibleElement();
+    const elementRect: DOMRect = visibleElement.getBoundingClientRect();
+
+    this.renderer.setStyle(visibleElement, "top", `${dropPosition.top}px`);
+    this.renderer.setStyle(visibleElement, "left", `${dropPosition.left}px`);
+    this.setPosition(elementRect.left - dropPosition.left, elementRect.top - dropPosition.top);
 
     return new Promise((resolve) => {
-      const visibleElement: HTMLElement = this.getVisibleElement();
-      const elementRect: DOMRect = visibleElement.getBoundingClientRect();
-      const placeholderRect: DOMRect = dropList.getPlaceholderRect()!;
-
-      this.renderer.setStyle(visibleElement, "top", `${placeholderRect.top - this.dropList!.getHeightDiff()}px`);
-      this.renderer.setStyle(visibleElement, "left", `${placeholderRect.left}px`);
-      this.setPosition(
-        elementRect.left - placeholderRect.left,
-        elementRect.top - (placeholderRect.top - this.dropList!.getHeightDiff())
-      );
-
       requestAnimationFrame(() => {
         this.renderer.setStyle(visibleElement, "transition", `transform ${ANIMATION_DURATION}ms`);
         this.resetPosition();

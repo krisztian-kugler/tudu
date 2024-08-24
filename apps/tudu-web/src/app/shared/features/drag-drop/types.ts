@@ -6,6 +6,11 @@ export type Position = {
   y: number;
 };
 
+export type ScrollPosition = {
+  scrollTop: number;
+  scrollLeft: number;
+};
+
 export type BoundingRectDistance = {
   top: number;
   bottom: number;
