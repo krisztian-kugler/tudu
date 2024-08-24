@@ -1,6 +1,6 @@
 import { moveItemInArray } from "src/utils/array";
 
-import type { DraggableDirective } from "../../shared/features/drag-drop/draggable.directive";
+import type { DraggableDirective } from "./draggable.directive";
 
 type DraggableItem = {
   draggable: DraggableDirective;
@@ -10,8 +10,6 @@ type DraggableItem = {
 
 export class DraggablePositionTracker {
   private positions: DraggableItem[] = [];
-
-  constructor() {}
 
   addItemAtIndex(item: DraggableItem, index: number) {
     if (index < 0 || index > this.positions.length) throw new Error("Index out of bounds");
@@ -23,7 +21,7 @@ export class DraggablePositionTracker {
     this.positions = this.positions.filter((_, i) => i !== index);
   }
 
-  moveItem(fromIndex: number, toIndex: number) {
-    moveItemInArray<DraggableItem>(this.positions, fromIndex, toIndex);
+  moveItem(sourceIndex: number, targetIndex: number) {
+    moveItemInArray<DraggableItem>(this.positions, sourceIndex, targetIndex);
   }
 }

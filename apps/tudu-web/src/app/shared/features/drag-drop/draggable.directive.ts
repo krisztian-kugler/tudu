@@ -1,9 +1,10 @@
 import { DOCUMENT } from "@angular/common";
-import { Directive, ElementRef, HostListener, Inject, Optional, Renderer2, SkipSelf } from "@angular/core";
+import { Directive, ElementRef, HostListener, inject, Renderer2 } from "@angular/core";
 import { Subscription } from "rxjs";
 
-import { DropListDirective } from "./drop-list.directive";
 import { DragAndDropService } from "./drag-and-drop.service";
+import { DropListDirective } from "./drop-list.directive";
+import { ANIMATION_DURATION } from "./utils";
 
 import type { Position, BoundingRectDistance } from "./types";
 
@@ -14,30 +15,22 @@ import type { Position, BoundingRectDistance } from "./types";
 export class DraggableDirective {
   private startPosition: Position = { x: 0, y: 0 };
   private movePosition: Position = { x: 0, y: 0 };
-
-  private sourceDropList?: DropListDirective;
-
+  private preview: HTMLElement | null = null;
+  private anchor: Node | null = null;
+  private pointerDistanceFromBoundingRect: BoundingRectDistance = { top: 0, bottom: 0, left: 0, right: 0 };
+  private sourceDropList: DropListDirective | null = null;
   private pointerMoveSubscription?: Subscription;
   private pointerUpSubscription?: Subscription;
   private scrollSubscription?: Subscription;
+  private scrollableAncestors = new Map<HTMLElement, { scrollTop: number; scrollLeft: number }>();
 
-  private preview: HTMLElement | null = null;
-  private anchor?: Node;
+  private document = inject(DOCUMENT);
+  private renderer = inject(Renderer2);
+  private element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private dragAndDropService = inject(DragAndDropService);
+  private dropList = inject(DropListDirective, { optional: true, skipSelf: true });
 
-  private pointerDistanceFromBoundingRect: BoundingRectDistance = {
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  };
-
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private renderer: Renderer2,
-    private element: ElementRef<HTMLElement>,
-    private dragAndDropService: DragAndDropService,
-    @Optional() @SkipSelf() private dropList?: DropListDirective
-  ) {
+  constructor() {
     this.dropList?.addDraggable(this);
   }
 
@@ -79,31 +72,28 @@ export class DraggableDirective {
   @HostListener("pointerdown", ["$event"]) onPointerDown({ clientX, clientY }: PointerEvent) {
     if (this.dragAndDropService.isDragging()) return;
 
+    this.dragAndDropService.startDragging();
     this.setPointerDistanceFromBoundingRect(clientX, clientY);
-
-    this.dragAndDropService.dragStart(this);
 
     this.startPosition = {
       x: clientX - this.movePosition.x,
       y: clientY - this.movePosition.y,
     };
 
-    const element = this.getRootElement();
+    const rootElement = this.getRootElement();
 
     if (this.dropList) {
-      this.preview = this.createPreview();
       this.sourceDropList = this.dropList;
+      this.preview = this.createPreview();
       this.anchor = this.renderer.createComment("");
-      this.renderer.insertBefore(this.dropList.host.nativeElement, this.anchor, element);
+      this.renderer.insertBefore(this.dropList.getRootElement(), this.anchor, rootElement);
       this.renderer.appendChild(this.document.body, this.preview);
-      this.renderer.removeChild(this.dropList.host.nativeElement, element);
+      this.renderer.removeChild(this.dropList.getRootElement(), rootElement);
       this.dropList.startDraggingSequence(this);
-
-      // this.dropList.removeDraggable(this);
     } else {
-      this.renderer.setStyle(element, "pointer-events", "none");
-      this.renderer.setStyle(element, "touch-action", "none");
-      this.renderer.setStyle(element, "user-select", "none");
+      this.renderer.setStyle(rootElement, "pointer-events", "none");
+      this.renderer.setStyle(rootElement, "touch-action", "none");
+      this.renderer.setStyle(rootElement, "user-select", "none");
     }
 
     this.renderer.setAttribute(this.document.body, "dragging", "");
@@ -126,17 +116,18 @@ export class DraggableDirective {
     if (this.dropList) {
       this.dropList.endDragSequence();
       this.animatePreviewToPlaceholder(this.dropList).then(() => {
-        this.renderer.insertBefore(this.sourceDropList!.host.nativeElement, this.getRootElement(), this.anchor);
-        this.renderer.removeChild(this.sourceDropList?.host.nativeElement, this.anchor);
+        this.renderer.insertBefore(this.sourceDropList!.getRootElement(), this.getRootElement(), this.anchor);
+        this.renderer.removeChild(this.sourceDropList!.getRootElement(), this.anchor);
         this.resetPosition();
-        this.anchor = undefined;
-        this.dropList!.drop(this, this.sourceDropList!);
+        this.anchor = null;
+        this.dropList!.drop(this.sourceDropList!);
         this.dropList = this.sourceDropList;
         this.dropList!.reset();
-        this.dragAndDropService.dragEnd();
+        this.resetPosition();
+        this.dragAndDropService.stopDragging();
       });
     } else {
-      this.dragAndDropService.dragEnd();
+      this.dragAndDropService.stopDragging();
     }
 
     this.pointerMoveSubscription?.unsubscribe();
@@ -145,8 +136,8 @@ export class DraggableDirective {
   }
 
   private onScroll() {
-    const { clientX, clientY } = this.dragAndDropService.getLastPointerMoveEvent()!;
-    this.updateDropList(clientX, clientY);
+    const { x, y } = this.dragAndDropService.getLastPointerPosition()!;
+    this.updateDropList(x, y);
   }
 
   private updateDropList(x: number, y: number) {
@@ -164,11 +155,9 @@ export class DraggableDirective {
     this.dropList.sortDraggables(this, x, y);
   }
 
-  private scrollableAncestors = new Map<HTMLElement, { scrollTop: number; scrollLeft: number }>();
-
   private cacheScrollableAncestors() {
     this.scrollableAncestors.clear();
-    let currentElement: HTMLElement | null = this.dropList!.host.nativeElement;
+    let currentElement: HTMLElement | null = this.dropList!.getRootElement();
 
     while (currentElement) {
       if (
@@ -216,7 +205,7 @@ export class DraggableDirective {
     return new Promise((resolve) => {
       const visibleElement: HTMLElement = this.getVisibleElement();
       const elementRect: DOMRect = visibleElement.getBoundingClientRect();
-      const placeholderRect: DOMRect = dropList.placeholder!.getBoundingClientRect();
+      const placeholderRect: DOMRect = dropList.getPlaceholderRect()!;
 
       this.renderer.setStyle(visibleElement, "top", `${placeholderRect.top - this.dropList!.getHeightDiff()}px`);
       this.renderer.setStyle(visibleElement, "left", `${placeholderRect.left}px`);
@@ -226,7 +215,7 @@ export class DraggableDirective {
       );
 
       requestAnimationFrame(() => {
-        this.renderer.setStyle(visibleElement, "transition", `transform ${dropList.animationDuration}ms`);
+        this.renderer.setStyle(visibleElement, "transition", `transform ${ANIMATION_DURATION}ms`);
         this.resetPosition();
 
         const unlisten = this.renderer.listen(visibleElement, "transitionend", () => {
@@ -240,20 +229,17 @@ export class DraggableDirective {
   }
 
   private createPreview(): HTMLElement {
-    const element = this.getRootElement();
-    const preview = element.cloneNode(true) as HTMLElement;
-    const { top, left } = element.getBoundingClientRect();
+    const rootElement = this.getRootElement();
+    const preview = rootElement.cloneNode(true) as HTMLElement;
+    const { top, left } = rootElement.getBoundingClientRect();
 
-    this.setStyles(preview, {
-      position: "fixed",
-      "z-index": "var(--z-index-draggable)",
-      top: `${top}px`,
-      left: `${left}px`,
-      "pointer-events": "none",
-      "touch-action": "none",
-      "user-select": "none",
-      "background-color": "red",
-    });
+    this.renderer.setStyle(preview, "position", "fixed");
+    this.renderer.setStyle(preview, "z-index", "var(--z-index-draggable)");
+    this.renderer.setStyle(preview, "top", `${top}px`);
+    this.renderer.setStyle(preview, "left", `${left}px`);
+    this.renderer.setStyle(preview, "pointer-events", "none");
+    this.renderer.setStyle(preview, "touch-action", "none");
+    this.renderer.setStyle(preview, "user-select", "none");
 
     return preview;
   }
@@ -263,8 +249,14 @@ export class DraggableDirective {
     this.preview = null;
   }
 
-  private setStyles(element: HTMLElement, styles: Record<string, string>) {
-    for (const [prop, value] of Object.entries(styles)) this.renderer.setStyle(element, prop, value);
+  resetStyles() {
+    const rootElement = this.getRootElement();
+
+    this.renderer.removeStyle(rootElement, "transform");
+    this.renderer.removeStyle(rootElement, "transition");
+
+    if (!rootElement.attributes.getNamedItem("style")?.value.trim())
+      this.renderer.removeAttribute(rootElement, "style");
   }
 
   private removeStyles(element: HTMLElement, styles: string[]) {

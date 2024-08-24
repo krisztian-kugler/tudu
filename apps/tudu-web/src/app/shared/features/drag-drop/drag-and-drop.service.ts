@@ -1,43 +1,44 @@
 import { DOCUMENT } from "@angular/common";
-import { Inject, Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { BehaviorSubject, Subject, fromEvent, takeWhile, tap } from "rxjs";
 
-import type { DraggableDirective } from "src/app/shared/features/drag-drop/draggable.directive";
+import type { Position } from "./types";
 
 @Injectable({
   providedIn: "root",
 })
 export class DragAndDropService {
-  activeDraggable: DraggableDirective | null = null;
   pointerMove$ = new Subject<PointerEvent>();
   pointerUp$ = new Subject<PointerEvent>();
   scroll$ = new Subject<UIEvent>();
 
-  private lastPointerMoveEvent: PointerEvent | null = null;
   private isDragging$ = new BehaviorSubject<boolean>(false);
+  private lastPointerPosition: Position = { x: 0, y: 0 };
 
-  constructor(@Inject(DOCUMENT) private document: Document) {}
+  private document = inject(DOCUMENT);
 
-  getLastPointerMoveEvent(): PointerEvent | null {
-    return this.lastPointerMoveEvent;
+  startDragging() {
+    this.isDragging$.next(true);
+    this.addGlobalListeners();
   }
 
-  private setLastPointerMoveEvent(event: PointerEvent) {
-    this.lastPointerMoveEvent = event;
+  stopDragging() {
+    this.isDragging$.next(false);
   }
 
   isDragging(): boolean {
     return this.isDragging$.value;
   }
 
-  dragStart(draggable: DraggableDirective) {
-    this.isDragging$.next(true);
-    this.activeDraggable = draggable;
+  getLastPointerPosition(): Position {
+    return this.lastPointerPosition;
+  }
 
+  private addGlobalListeners() {
     fromEvent<PointerEvent>(this.document, "pointermove")
       .pipe(
         takeWhile(() => this.isDragging$.value),
-        tap((event) => this.setLastPointerMoveEvent(event))
+        tap(({ clientX, clientY }) => (this.lastPointerPosition = { x: clientX, y: clientY }))
       )
       .subscribe((event) => this.pointerMove$.next(event));
 
@@ -48,11 +49,5 @@ export class DragAndDropService {
     fromEvent<UIEvent>(this.document, "scroll", { capture: true, passive: true })
       .pipe(takeWhile(() => this.isDragging$.value))
       .subscribe((event) => this.scroll$.next(event));
-  }
-
-  dragEnd() {
-    this.isDragging$.next(false);
-    this.activeDraggable = null;
-    this.lastPointerMoveEvent = null;
   }
 }
