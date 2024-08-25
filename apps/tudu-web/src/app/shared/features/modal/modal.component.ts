@@ -10,7 +10,7 @@ import {
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
-import { IconComponent } from "../icon/icon.component";
+import { IconComponent } from "src/app/components/icon/icon.component";
 
 @Component({
   selector: "tudu-modal",

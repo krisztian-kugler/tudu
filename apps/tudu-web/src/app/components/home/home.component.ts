@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, TemplateRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
 import { ButtonComponent } from "../button/button.component";
-import { ModalService } from "src/app/services/modal/modal.service";
 import { NotificationService } from "src/app/services/notification/notification.service";
+import { ModalService } from "src/app/shared/features/modal/modal.service";
 
 @Component({
   selector: "tudu-home",

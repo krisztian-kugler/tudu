@@ -2,15 +2,15 @@ import { DOCUMENT } from "@angular/common";
 import {
   ApplicationRef,
   ComponentRef,
-  Inject,
   Injectable,
   Renderer2,
   TemplateRef,
   createComponent,
+  inject,
 } from "@angular/core";
 import { Subject } from "rxjs";
 
-import { ModalComponent } from "src/app/components/modal/modal.component";
+import { ModalComponent } from "./modal.component";
 
 type ModalOptions = {
   title?: string;
@@ -21,14 +21,11 @@ type ModalOptions = {
 })
 export class ModalService {
   private modalNotifier$?: Subject<string>;
-
   private modalComponent: ComponentRef<ModalComponent> | null = null;
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private application: ApplicationRef,
-    private renderer: Renderer2
-  ) {}
+  private document = inject(DOCUMENT);
+  private application = inject(ApplicationRef);
+  private renderer = inject(Renderer2);
 
   open(contentTemplate: TemplateRef<any>, options?: ModalOptions) {
     if (this.modalComponent)
