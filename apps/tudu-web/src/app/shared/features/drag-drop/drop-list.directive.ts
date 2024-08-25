@@ -9,7 +9,7 @@ import { moveItemInArray, removeItemFromArray } from "src/utils/array";
 import { ANIMATION_DURATION, canScroll, getScrollToOptions } from "./utils";
 
 import type { DraggableDirective } from "./draggable.directive";
-import type { DropListDropEvent, DropListEnterEvent, DropListExitEvent, DropListOrientation } from "./types";
+import type { DropListDropEvent, DropListEnterEvent, DropListExitEvent, DropListOrientation, Position } from "./types";
 
 @Directive({
   selector: "[tuduDropList]",
@@ -31,6 +31,7 @@ export class DropListDirective implements OnDestroy {
   private sourceIndex: number = NaN;
   private targetIndex: number = NaN;
   private isPointerOverList: boolean = false;
+  private isScrolling: boolean = false;
   private pointerMoveSubscription?: Subscription;
   private scrollSubscription?: Subscription;
   private scrollableAncestors: HTMLElement[] = [];
@@ -88,6 +89,12 @@ export class DropListDirective implements OnDestroy {
     return Array.from(this.unsortedDraggables).sort((a, b) =>
       a.getRootElement().compareDocumentPosition(b.getRootElement()) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
     );
+  }
+
+  /** Calculate the position on the viewport where the active draggable has to be moved after drop */
+  getDropPosition(): Position | undefined {
+    const placeholderRect = this.placeholder?.getBoundingClientRect();
+    return placeholderRect && { y: placeholderRect.top - this.getHeightDiff(), x: placeholderRect.left };
   }
 
   private cacheScrollableAncestors() {
@@ -176,7 +183,10 @@ export class DropListDirective implements OnDestroy {
   }
 
   private startScrolling() {
-    this.stopScrolling();
+    if (this.isScrolling) return;
+
+    this.isScrolling = true;
+    console.log("scrolling started!");
 
     interval(0, animationFrameScheduler)
       .pipe(takeUntil(this.stopScrollInterval))
@@ -184,13 +194,18 @@ export class DropListDirective implements OnDestroy {
   }
 
   private stopScrolling() {
+    if (!this.isScrolling) return;
+
+    this.isScrolling = false;
+    console.log("scrolling stopped!");
+
     this.stopScrollInterval.next();
   }
 
   startDraggingSequence(draggable: DraggableDirective) {
     this.isPointerOverList = true;
 
-    this.listenToScrollEvents();
+    this.listenToScrollEvents(draggable);
     this.cacheScrollableAncestors();
     this.cacheDraggablePositions();
 
@@ -241,6 +256,8 @@ export class DropListDirective implements OnDestroy {
 
   /** Called when a draggable enters the drop list at the given coordinates */
   enter(draggable: DraggableDirective, pointerX: number, pointerY: number) {
+    console.log("drop list entered");
+
     this.isPointerOverList = true;
     this.cacheScrollableAncestors();
 
@@ -272,26 +289,21 @@ export class DropListDirective implements OnDestroy {
       this.createDOMRectHelpers(draggable);
     }
 
+    this.listenToScrollEvents(draggable);
+    this.startScrollingIfNeeded(pointerX, pointerY);
+
     this.entered.emit({ draggable, dropList: this, index: this.sourceIndex });
   }
 
-  leave(draggable: DraggableDirective) {
+  exit(draggable: DraggableDirective) {
     this.isPointerOverList = false;
     removeItemFromArray(this.draggablePositions, this.targetIndex);
     this.draggablePositions.forEach((item) => {
       item.offset = 0;
     });
-    console.log(
-      this.draggablePositions.map((item) => {
-        return {
-          item: item.draggable.getRootElement().textContent,
-          top: item.clientRect.top,
-        };
-      })
-    );
+
     this.sourceIndex = this.targetIndex = NaN;
     this.stopScrolling();
-    console.log("drop list left");
 
     this.clearDOMRectHelpers();
 
@@ -315,7 +327,11 @@ export class DropListDirective implements OnDestroy {
           this.renderer.setStyle(item.getRootElement(), "transition", `transform ${ANIMATION_DURATION}ms`);
         });
       });
+
     this.pointerMoveSubscription?.unsubscribe();
+    this.scrollSubscription?.unsubscribe();
+    console.log("drop list exited");
+
     this.exited.emit({ draggable, dropList: this });
   }
 
@@ -332,9 +348,10 @@ export class DropListDirective implements OnDestroy {
     });
   }
 
-  private listenToScrollEvents() {
+  private listenToScrollEvents(draggable: DraggableDirective) {
     this.scrollSubscription = this.dragAndDropService.scroll$.subscribe(() => {
-      console.log("Listening to scroll events in drop list...");
+      const { x, y } = this.dragAndDropService.getLastPointerPosition();
+      this.sortDraggables(draggable, x, y);
     });
   }
 

@@ -1,6 +1,6 @@
 import { ScrollDirection } from "src/utils/dom";
 
-export const ANIMATION_DURATION = 500;
+export const ANIMATION_DURATION = 5000;
 
 export const canScroll = (element: HTMLElement, direction: ScrollDirection): boolean => {
   const { scrollTop, scrollLeft, scrollWidth, scrollHeight, clientWidth, clientHeight } = element;
