@@ -1,5 +1,8 @@
+import type { Mutable, PickProperties } from "../../utils/types";
 import type { DraggableDirective } from "./draggable.directive";
 import type { DropListDirective } from "./drop-list.directive";
+
+export type MutableDOMRect = Mutable<PickProperties<DOMRect>>;
 
 export type Position = {
   x: number;

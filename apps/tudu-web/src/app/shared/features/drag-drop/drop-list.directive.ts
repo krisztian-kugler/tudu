@@ -1,15 +1,30 @@
 import { Directive, ElementRef, HostBinding, inject, input, NgZone, OnDestroy, output, Renderer2 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
-import { animationFrameScheduler, interval, Subject, Subscription, takeUntil } from "rxjs";
+import { animationFrameScheduler, interval, map, Subject, Subscription, takeUntil } from "rxjs";
 
 import { DragAndDropService } from "./drag-and-drop.service";
 import { DropListGroupDirective } from "./drop-list-group.directive";
-import { getElementScrollDirection, getElementSizeWithMargins, ScrollDirection } from "src/utils/dom";
 import { moveItemInArray, removeItemFromArray } from "src/utils/array";
-import { ANIMATION_DURATION, canScroll, getScrollToOptions } from "./utils";
+import {
+  ANIMATION_DURATION,
+  canScroll,
+  getElementScrollDirection,
+  getElementSizeWithMargins,
+  getMutableClientRect,
+  getScrollToOptions,
+  ScrollDirection,
+} from "./utils";
 
 import type { DraggableDirective } from "./draggable.directive";
-import type { DropListDropEvent, DropListEnterEvent, DropListExitEvent, DropListOrientation, Position } from "./types";
+import type {
+  DropListDropEvent,
+  DropListEnterEvent,
+  DropListExitEvent,
+  DropListOrientation,
+  MutableDOMRect,
+  Position,
+  ScrollPosition,
+} from "./types";
 
 @Directive({
   selector: "[tuduDropList]",
@@ -34,14 +49,14 @@ export class DropListDirective implements OnDestroy {
   private isScrolling: boolean = false;
   private pointerMoveSubscription?: Subscription;
   private scrollSubscription?: Subscription;
-  private scrollableAncestors: HTMLElement[] = [];
+  private scrollableAncestors = new Map<HTMLElement, ScrollPosition>();
   private scrollElement?: HTMLElement;
   private scrollDirection = ScrollDirection.NONE;
   private autoScrollStep: number = 2;
   private stopScrollInterval = new Subject<void>();
   private draggablePositions: {
     draggable: DraggableDirective;
-    clientRect: DOMRect;
+    clientRect: MutableDOMRect;
     offset: number;
   }[] = [];
 
@@ -98,12 +113,14 @@ export class DropListDirective implements OnDestroy {
   }
 
   private cacheScrollableAncestors() {
-    this.scrollableAncestors = [];
+    this.scrollableAncestors.clear();
     let element: HTMLElement | null = this.getRootElement();
 
     while (element) {
-      if (element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight)
-        this.scrollableAncestors.push(element);
+      if (element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight) {
+        const { scrollTop, scrollLeft } = element;
+        this.scrollableAncestors.set(element, { scrollTop, scrollLeft });
+      }
       element = element.parentElement;
     }
   }
@@ -129,7 +146,7 @@ export class DropListDirective implements OnDestroy {
   private cacheDraggablePositions() {
     this.draggablePositions = this.getSortedDraggables().map((draggable) => ({
       draggable,
-      clientRect: draggable.getRootElement().getBoundingClientRect(),
+      clientRect: getMutableClientRect(draggable.getRootElement()),
       offset: 0,
     }));
   }
@@ -164,7 +181,7 @@ export class DropListDirective implements OnDestroy {
   }
 
   startScrollingIfNeeded(pointerX: number, pointerY: number) {
-    this.scrollElement = this.scrollableAncestors.find((ancestor) => {
+    this.scrollElement = Array.from(this.scrollableAncestors.keys()).find((ancestor) => {
       const elementScrollDirection = getElementScrollDirection(
         ancestor.getBoundingClientRect(),
         0.1,
@@ -206,6 +223,11 @@ export class DropListDirective implements OnDestroy {
     this.isPointerOverList = true;
 
     this.listenToScrollEvents(draggable);
+    this.getSiblingDropLists().forEach((sibling) => {
+      sibling.cacheDraggablePositions();
+      sibling.listenToScrollEvents(draggable);
+    });
+
     this.cacheScrollableAncestors();
     this.cacheDraggablePositions();
 
@@ -258,10 +280,10 @@ export class DropListDirective implements OnDestroy {
   enter(draggable: DraggableDirective, pointerX: number, pointerY: number) {
     console.log("drop list entered");
 
-    this.isPointerOverList = true;
     this.cacheScrollableAncestors();
+    this.isPointerOverList = true;
 
-    if (this.draggablePositions.length === 0) this.cacheDraggablePositions();
+    // if (this.draggablePositions.length === 0) this.cacheDraggablePositions();
     // this.cacheDraggablePositions();
 
     this.initializePlaceholder(draggable);
@@ -270,7 +292,7 @@ export class DropListDirective implements OnDestroy {
 
     this.draggablePositions.splice(this.targetIndex, 0, {
       draggable,
-      clientRect: draggable.getRootElement().getBoundingClientRect(),
+      clientRect: getMutableClientRect(draggable.getRootElement()),
       offset: 0,
     });
 
@@ -289,7 +311,7 @@ export class DropListDirective implements OnDestroy {
       this.createDOMRectHelpers(draggable);
     }
 
-    this.listenToScrollEvents(draggable);
+    // this.listenToScrollEvents(draggable);
     this.startScrollingIfNeeded(pointerX, pointerY);
 
     this.entered.emit({ draggable, dropList: this, index: this.sourceIndex });
@@ -329,7 +351,7 @@ export class DropListDirective implements OnDestroy {
       });
 
     this.pointerMoveSubscription?.unsubscribe();
-    this.scrollSubscription?.unsubscribe();
+    // this.scrollSubscription?.unsubscribe();
     console.log("drop list exited");
 
     this.exited.emit({ draggable, dropList: this });
@@ -337,7 +359,10 @@ export class DropListDirective implements OnDestroy {
 
   reset() {
     this.resetDraggables();
-    this.getSiblingDropLists().forEach((dropList) => dropList.resetDraggables());
+    this.getSiblingDropLists().forEach((dropList) => {
+      dropList.resetDraggables();
+      dropList.scrollSubscription?.unsubscribe();
+    });
   }
 
   private resetDraggables() {
@@ -349,10 +374,38 @@ export class DropListDirective implements OnDestroy {
   }
 
   private listenToScrollEvents(draggable: DraggableDirective) {
-    this.scrollSubscription = this.dragAndDropService.scroll$.subscribe(() => {
-      const { x, y } = this.dragAndDropService.getLastPointerPosition();
-      this.sortDraggables(draggable, x, y);
-    });
+    this.scrollSubscription = this.dragAndDropService.scroll$
+      .pipe(
+        map(({ target }): Position => {
+          const scrolledElement = target as HTMLElement;
+          const oldScrollPosition = this.scrollableAncestors.get(scrolledElement);
+
+          if (!oldScrollPosition) return { x: 0, y: 0 };
+
+          this.scrollableAncestors.set(scrolledElement, {
+            scrollTop: scrolledElement.scrollTop,
+            scrollLeft: scrolledElement.scrollLeft,
+          });
+
+          return {
+            x: -(scrolledElement.scrollLeft - oldScrollPosition.scrollLeft),
+            y: -(scrolledElement.scrollTop - oldScrollPosition.scrollTop),
+          };
+        })
+      )
+      .subscribe(({ x, y }) => {
+        this.draggablePositions.forEach(({ clientRect }) => {
+          clientRect.top += y;
+          clientRect.bottom = clientRect.top + clientRect.height;
+          clientRect.left += x;
+          clientRect.right = clientRect.left + clientRect.width;
+        });
+
+        if (this.isPointerOverList) {
+          const { x, y } = this.dragAndDropService.getLastPointerPosition();
+          this.sortDraggables(draggable, x, y);
+        }
+      });
   }
 
   sortDraggables(draggable: DraggableDirective, pointerX: number, pointerY: number) {
@@ -401,6 +454,7 @@ export class DropListDirective implements OnDestroy {
 
   ngOnDestroy() {
     this.dropListGroup?.removeDropList(this);
+    this.scrollSubscription?.unsubscribe();
     this.stopScrollInterval.complete();
   }
 
@@ -428,7 +482,7 @@ export class DropListDirective implements OnDestroy {
   }
 
   /** To be deleted */
-  private createDOMRectHelper(DOMRect: DOMRect, offset: number, color: string): HTMLElement {
+  private createDOMRectHelper(DOMRect: MutableDOMRect, offset: number, color: string): HTMLElement {
     const element = this.renderer.createElement("div");
     this.renderer.setStyle(element, "position", "fixed");
     this.renderer.setStyle(element, "z-index", 100);
