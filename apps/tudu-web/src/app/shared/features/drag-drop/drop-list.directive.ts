@@ -4,7 +4,7 @@ import { animationFrameScheduler, interval, map, Subject, Subscription, takeUnti
 
 import { DragAndDropService } from "./drag-and-drop.service";
 import { DropListGroupDirective } from "./drop-list-group.directive";
-import { moveItemInArray, removeItemFromArray } from "src/utils/array";
+import { moveItemInArrayMutable, removeItemFromArrayMutable } from "src/utils/array";
 import {
   ANIMATION_DURATION,
   canScroll,
@@ -319,7 +319,7 @@ export class DropListDirective implements OnDestroy {
 
   exit(draggable: DraggableDirective) {
     this.isPointerOverList = false;
-    removeItemFromArray(this.draggablePositions, this.targetIndex);
+    removeItemFromArrayMutable(this.draggablePositions, this.targetIndex);
     this.draggablePositions.forEach((item) => {
       item.offset = 0;
     });
@@ -415,7 +415,7 @@ export class DropListDirective implements OnDestroy {
     if (dropIndexFromPoint === -1 || dropIndexFromPoint === this.targetIndex) return;
 
     this.sourceIndex = this.targetIndex;
-    moveItemInArray(this.draggablePositions, this.sourceIndex, dropIndexFromPoint);
+    moveItemInArrayMutable(this.draggablePositions, this.sourceIndex, dropIndexFromPoint);
     this.targetIndex = dropIndexFromPoint;
 
     this.draggablePositions.forEach((item, index) => {

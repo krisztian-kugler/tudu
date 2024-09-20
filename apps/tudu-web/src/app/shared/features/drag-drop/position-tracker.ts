@@ -1,27 +1,26 @@
-import { moveItemInArray } from "src/utils/array";
+import { addItemToArrayImmutable, moveItemInArrayImmutable, removeItemFromArrayImmutable } from "src/utils/array";
 
 import type { DraggableDirective } from "./draggable.directive";
+import type { MutableDOMRect } from "./types";
 
 type DraggableItem = {
   draggable: DraggableDirective;
-  clientRect: DOMRect;
+  rect: MutableDOMRect;
   offset: number;
 };
 
 export class DraggablePositionTracker {
-  private positions: DraggableItem[] = [];
+  private items: DraggableItem[] = [];
 
-  addItemAtIndex(item: DraggableItem, index: number) {
-    if (index < 0 || index > this.positions.length) throw new Error("Index out of bounds");
-    this.positions = [...this.positions.slice(0, index), item, ...this.positions.slice(index)];
+  addItem(item: DraggableItem, index: number) {
+    this.items = addItemToArrayImmutable<DraggableItem>(this.items, item, index);
   }
 
-  removeItemAtIndex(index: number) {
-    if (index < 0 || index >= this.positions.length) throw new Error("Index out of bounds");
-    this.positions = this.positions.filter((_, i) => i !== index);
+  removeItem(index: number) {
+    this.items = removeItemFromArrayImmutable<DraggableItem>(this.items, index);
   }
 
   moveItem(sourceIndex: number, targetIndex: number) {
-    moveItemInArray<DraggableItem>(this.positions, sourceIndex, targetIndex);
+    this.items = moveItemInArrayImmutable<DraggableItem>(this.items, sourceIndex, targetIndex);
   }
 }

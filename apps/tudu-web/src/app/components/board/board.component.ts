@@ -4,7 +4,6 @@ import { CommonModule } from "@angular/common";
 import { MinimapComponent } from "../minimap/minimap.component";
 import { DraggableDirective } from "src/app/shared/features/drag-drop/draggable.directive";
 import { AutoScrollDirective } from "src/app/directives/auto-scroll/auto-scroll.directive";
-import { moveItemInArray } from "src/utils/array";
 import {
   DragAndDropService,
   DragAreaDirective,
