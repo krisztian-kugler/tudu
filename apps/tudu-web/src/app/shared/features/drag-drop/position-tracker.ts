@@ -1,26 +1,62 @@
+import { Renderer2 } from "@angular/core";
+
 import { addItemToArrayImmutable, moveItemInArrayImmutable, removeItemFromArrayImmutable } from "src/utils/array";
+import { getMutableClientRect } from "./utils";
 
 import type { DraggableDirective } from "./draggable.directive";
-import type { MutableDOMRect } from "./types";
+import type { DropListOrientation, MutableDOMRect } from "./types";
 
-type DraggableItem = {
+type DraggablePosition = {
   draggable: DraggableDirective;
-  rect: MutableDOMRect;
+  clientRect: MutableDOMRect;
   offset: number;
 };
 
+const DEFAULT_TARGET_INDEX: number = -1;
+
 export class DraggablePositionTracker {
-  private items: DraggableItem[] = [];
+  orientation: DropListOrientation = "vertical";
 
-  addItem(item: DraggableItem, index: number) {
-    this.items = addItemToArrayImmutable<DraggableItem>(this.items, item, index);
+  private draggablePositions: DraggablePosition[] = [];
+
+  /** Keeps track of the index at which the actively dragged element would be dropped. */
+  private targetIndex: number = DEFAULT_TARGET_INDEX;
+
+  constructor(private renderer: Renderer2) {}
+
+  cache(draggables: readonly DraggableDirective[]) {
+    this.draggablePositions = draggables.map((draggable) => ({
+      draggable,
+      clientRect: getMutableClientRect(draggable.getRootElement()),
+      offset: 0,
+    }));
   }
 
-  removeItem(index: number) {
-    this.items = removeItemFromArrayImmutable<DraggableItem>(this.items, index);
+  reset() {
+    this.draggablePositions = [];
+    this.targetIndex = DEFAULT_TARGET_INDEX;
   }
 
-  moveItem(sourceIndex: number, targetIndex: number) {
-    this.items = moveItemInArrayImmutable<DraggableItem>(this.items, sourceIndex, targetIndex);
+  move(sourceIndex: number, targetIndex: number) {
+    this.draggablePositions = moveItemInArrayImmutable<DraggablePosition>(
+      this.draggablePositions,
+      sourceIndex,
+      targetIndex
+    );
+  }
+
+  sort(): { sourceIndex: number; targetIndex: number } {
+    return {
+      sourceIndex: 0,
+      targetIndex: this.targetIndex,
+    };
+  }
+
+  private add(item: DraggablePosition, index: number) {
+    this.draggablePositions = addItemToArrayImmutable<DraggablePosition>(this.draggablePositions, item, index);
+  }
+
+  private remove(index: number) {
+    this.draggablePositions = removeItemFromArrayImmutable<DraggablePosition>(this.draggablePositions, index);
   }
 }
