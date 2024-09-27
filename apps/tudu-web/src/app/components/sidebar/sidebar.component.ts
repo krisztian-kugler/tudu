@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostBinding, HostListener } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
-import { TranslateModule } from "@ngx-translate/core";
 
 import { IconComponent } from "../icon/icon.component";
 import { IconName } from "src/provide-icons";
@@ -20,7 +19,7 @@ type NavigationLink = {
 @Component({
   selector: "tudu-sidebar",
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, IconComponent, SidebarButtonComponent],
+  imports: [CommonModule, RouterModule, IconComponent, SidebarButtonComponent],
   templateUrl: "./sidebar.component.html",
   styleUrls: ["./sidebar.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
