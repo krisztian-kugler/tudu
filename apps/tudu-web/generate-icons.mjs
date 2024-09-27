@@ -3,7 +3,7 @@ import fs from "fs";
 import camelCase from "camelcase";
 
 const root = "src/icons";
-const iconsSrcDir = "node_modules/feather-icons/dist/icons";
+const iconsSrcDir = "../../node_modules/feather-icons/dist/icons";
 const iconsDestDir = `${root}/svg`;
 const indexFile = `${root}/index.ts`;
 
