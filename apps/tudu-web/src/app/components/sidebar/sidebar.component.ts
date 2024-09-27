@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding, HostListener } from "@angular/core";
+import { ChangeDetectionStrategy, Component, HostBinding, HostListener, inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 
@@ -7,6 +7,7 @@ import { IconName } from "src/provide-icons";
 import { Theme, ThemeService } from "src/app/services/theme/theme.service";
 import { SidebarButtonComponent } from "../sidebar-button/sidebar-button.component";
 import { BrowserStorageService, StorageKey } from "src/app/services/browser-storage/browser-storage.service";
+import { TranslationService } from "src/app/shared/features/translation/translation.service";
 
 type SidebarAppearance = "default" | "compact";
 
@@ -27,6 +28,8 @@ type NavigationLink = {
 export class SidebarComponent {
   @HostBinding("attr.data-appearance") appearance: SidebarAppearance = "default";
   @HostBinding("class.compact") compact: boolean = false;
+
+  translations = inject(TranslationService).translations;
 
   mapThemeToIcon: Record<Theme, IconName> = {
     light: "sun",

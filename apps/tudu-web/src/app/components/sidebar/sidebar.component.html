@@ -26,7 +26,7 @@
     tudu-sidebar-button
     icon="sidebar"
     buttonTitle="Sidebar"
-    [label]="'sidebarAppearance.' + (compact ? 'compact' : 'default')"
+    [label]="compact ? translations.sidebarAppearance_compact() : translations.sidebarAppearance_default()"
     [compact]="compact"
     (click)="toggleAppearance()"
   ></button>
