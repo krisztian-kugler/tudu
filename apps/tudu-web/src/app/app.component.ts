@@ -1,7 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { RouterModule } from "@angular/router";
-import { TranslateService } from "@ngx-translate/core";
 
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { ThemeService } from "./services/theme/theme.service";
@@ -37,10 +36,4 @@ import { NotificationService } from "./services/notification/notification.servic
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  constructor(translateService: TranslateService) {
-    translateService.addLangs(["en"]);
-    translateService.setDefaultLang("en");
-    translateService.use("en");
-  }
-}
+export class AppComponent {}

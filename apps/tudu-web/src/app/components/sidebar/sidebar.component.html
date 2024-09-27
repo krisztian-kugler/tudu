@@ -3,14 +3,14 @@
 </header>
 <nav class="navigation">
   @for (link of navigationLinks; track link.label) {
-  <a
-    tudu-sidebar-button
-    [icon]="link.icon"
-    [label]="link.label"
-    [compact]="compact"
-    [routerLink]="link.path"
-    routerLinkActive="active"
-  ></a>
+    <a
+      tudu-sidebar-button
+      [icon]="link.icon"
+      [label]="link.label"
+      [compact]="compact"
+      [routerLink]="link.path"
+      routerLinkActive="active"
+    ></a>
   }
 </nav>
 <footer class="footer">
@@ -18,7 +18,7 @@
     tudu-sidebar-button
     [icon]="(themeService.theme$ | async) === 'light' ? 'sun' : 'moon'"
     buttonTitle="Theme"
-    [label]="'theme.' + (themeService.theme$ | async) | translate"
+    [label]="'theme.' + (themeService.theme$ | async)"
     [compact]="compact"
     (click)="themeService.toggle()"
   ></button>
@@ -26,7 +26,7 @@
     tudu-sidebar-button
     icon="sidebar"
     buttonTitle="Sidebar"
-    [label]="'sidebarAppearance.' + (compact ? 'compact' : 'default') | translate"
+    [label]="'sidebarAppearance.' + (compact ? 'compact' : 'default')"
     [compact]="compact"
     (click)="toggleAppearance()"
   ></button>
