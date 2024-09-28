@@ -6,7 +6,8 @@
     "start": "ng serve -o",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "icons": "node generate-icons.mjs"
   },
   "private": true,
@@ -28,14 +29,10 @@
     "@angular-devkit/build-angular": "^18.2.6",
     "@angular/cli": "^18.2.6",
     "@angular/compiler-cli": "^18.2.6",
-    "@types/jasmine": "^5.1.4",
+    "@types/jest": "^29.5.13",
     "camelcase": "^8.0.0",
-    "jasmine-core": "^5.3.0",
-    "karma": "^6.4.4",
-    "karma-chrome-launcher": "^3.2.0",
-    "karma-coverage": "^2.2.1",
-    "karma-jasmine": "^5.1.0",
-    "karma-jasmine-html-reporter": "^2.1.0",
+    "jest": "^29.7.0",
+    "jest-preset-angular": "^14.2.4",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   }
