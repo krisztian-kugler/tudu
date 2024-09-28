@@ -10,7 +10,7 @@ import { ModalService } from "src/app/shared/features/modal/modal.service";
   standalone: true,
   imports: [CommonModule, ButtonComponent],
   templateUrl: "./home.component.html",
-  styleUrls: ["./home.component.scss"],
+  styleUrls: ["./home.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {

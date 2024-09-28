@@ -22,7 +22,7 @@ type NavigationLink = {
   standalone: true,
   imports: [CommonModule, RouterModule, IconComponent, SidebarButtonComponent],
   templateUrl: "./sidebar.component.html",
-  styleUrls: ["./sidebar.component.scss"],
+  styleUrls: ["./sidebar.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {

@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'tudu-backlog',
+  selector: "tudu-backlog",
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './backlog.component.html',
-  styleUrls: ['./backlog.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: "./backlog.component.html",
+  styleUrls: ["./backlog.component.css"],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BacklogComponent {
-
-}
+export class BacklogComponent {}

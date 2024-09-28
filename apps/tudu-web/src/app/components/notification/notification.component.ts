@@ -8,7 +8,7 @@ import { IconComponent } from "../icon/icon.component";
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: "./notification.component.html",
-  styleUrl: "./notification.component.scss",
+  styleUrl: "./notification.component.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationComponent {

@@ -28,7 +28,7 @@
   height: fit-content;
   min-height: 100%;
   padding: 0 48px;
-  // border: 1px dashed var(--color-button-hover-text);
+  /* border: 1px dashed var(--color-button-hover-text); */
 
   &:before,
   &:after {
@@ -37,8 +37,8 @@
     z-index: 2;
     display: block;
     width: 48px;
-    //background-color: var(--color-background);
-    //background-color: green;
+    /* background-color: var(--color-background); */
+    /* background-color: green; */
   }
 
   &:before {

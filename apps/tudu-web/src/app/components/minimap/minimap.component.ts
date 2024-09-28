@@ -7,10 +7,10 @@ import { CommonModule } from "@angular/common";
   imports: [CommonModule],
   template: `
     @for (column of columns; track $index) {
-    <div class="column"></div>
+      <div class="column"></div>
     }
   `,
-  styleUrls: ["./minimap.component.scss"],
+  styleUrls: ["./minimap.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MinimapComponent {

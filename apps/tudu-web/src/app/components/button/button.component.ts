@@ -12,7 +12,7 @@ type ButtonVariant = "primary" | "secondary" | "tertiary";
   standalone: true,
   imports: [IconComponent, SpinnerComponent],
   templateUrl: "./button.component.html",
-  styleUrl: "./button.component.scss",
+  styleUrl: "./button.component.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {

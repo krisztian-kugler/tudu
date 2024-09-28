@@ -6,7 +6,7 @@ import { RouterModule } from "@angular/router";
   standalone: true,
   imports: [RouterModule],
   templateUrl: "./settings.component.html",
-  styleUrl: "./settings.component.scss",
+  styleUrl: "./settings.component.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsComponent {

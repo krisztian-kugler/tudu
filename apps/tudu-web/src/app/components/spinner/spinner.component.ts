@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, HostBinding, input } from "@angular
   selector: "tudu-spinner",
   standalone: true,
   template: "",
-  styleUrl: "./spinner.component.scss",
+  styleUrl: "./spinner.component.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SpinnerComponent {

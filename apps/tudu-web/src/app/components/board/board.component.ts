@@ -27,7 +27,7 @@ type Ticket = number;
   ],
   providers: [DragAndDropService],
   templateUrl: "./board.component.html",
-  styleUrls: ["./board.component.scss"],
+  styleUrls: ["./board.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardComponent {

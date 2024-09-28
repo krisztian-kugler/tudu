@@ -9,7 +9,7 @@ import { IconName } from "src/provide-icons";
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: "./sidebar-button.component.html",
-  styleUrls: ["./sidebar-button.component.scss"],
+  styleUrls: ["./sidebar-button.component.css"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarButtonComponent {
