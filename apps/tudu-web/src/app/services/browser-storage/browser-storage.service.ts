@@ -3,6 +3,7 @@ import { Injectable } from "@angular/core";
 export enum StorageKey {
   Theme = "tudu_theme",
   SidebarAppearance = "tudu_sidebar_appearance",
+  Language = "tudu_language",
 }
 
 @Injectable({

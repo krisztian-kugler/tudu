@@ -1,6 +1,6 @@
+import { inject, Injectable, RendererFactory2 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
-import { Inject, Injectable, Renderer2 } from "@angular/core";
-import { BehaviorSubject, tap } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 import { BrowserStorageService, StorageKey } from "../browser-storage/browser-storage.service";
 
@@ -10,24 +10,24 @@ export type Theme = "light" | "dark";
   providedIn: "root",
 })
 export class ThemeService {
-  theme$ = new BehaviorSubject<Theme>(this.browserStorageService.get<Theme>(StorageKey.Theme) || "light");
-
-  private applyTheme$ = this.theme$.pipe(
-    tap((value) => {
-      this.renderer.setAttribute(this.document.documentElement, "data-theme", value);
-      this.browserStorageService.set(StorageKey.Theme, value);
-    })
+  private readonly document = inject(DOCUMENT);
+  private readonly browserStorageService = inject(BrowserStorageService);
+  private readonly rendererFactory = inject(RendererFactory2);
+  private readonly renderer = this.rendererFactory.createRenderer(null, null);
+  private readonly themeSubject = new BehaviorSubject<Theme>(
+    this.browserStorageService.get<Theme>(StorageKey.Theme) || "light"
   );
 
-  constructor(
-    @Inject(DOCUMENT) private document: Document,
-    private renderer: Renderer2,
-    private browserStorageService: BrowserStorageService
-  ) {
-    this.applyTheme$.subscribe();
+  readonly theme$ = this.themeSubject.asObservable();
+
+  constructor() {
+    this.themeSubject.subscribe((value) => {
+      this.renderer.setAttribute(this.document.documentElement, "data-theme", value);
+      this.browserStorageService.set(StorageKey.Theme, value);
+    });
   }
 
   toggle() {
-    this.theme$.next(this.theme$.value === "light" ? "dark" : "light");
+    this.themeSubject.next(this.themeSubject.value === "light" ? "dark" : "light");
   }
 }

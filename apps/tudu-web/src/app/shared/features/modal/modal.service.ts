@@ -3,7 +3,7 @@ import {
   ApplicationRef,
   ComponentRef,
   Injectable,
-  Renderer2,
+  RendererFactory2,
   TemplateRef,
   createComponent,
   inject,
@@ -25,7 +25,8 @@ export class ModalService {
 
   private document = inject(DOCUMENT);
   private application = inject(ApplicationRef);
-  private renderer = inject(Renderer2);
+  private readonly rendererFactory = inject(RendererFactory2);
+  private readonly renderer = this.rendererFactory.createRenderer(null, null);
 
   open(contentTemplate: TemplateRef<any>, options?: ModalOptions) {
     if (this.modalComponent)

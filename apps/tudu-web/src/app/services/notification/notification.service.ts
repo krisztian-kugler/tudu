@@ -4,9 +4,10 @@ import {
   ComponentRef,
   Inject,
   Injectable,
-  Renderer2,
+  RendererFactory2,
   TemplateRef,
   createComponent,
+  inject,
 } from "@angular/core";
 
 import { NotificationComponent } from "src/app/components/notification/notification.component";
@@ -15,12 +16,14 @@ import { NotificationComponent } from "src/app/components/notification/notificat
   providedIn: "root",
 })
 export class NotificationService {
+  private readonly rendererFactory = inject(RendererFactory2);
+  private readonly renderer = this.rendererFactory.createRenderer(null, null);
+
   private notificationComponent: ComponentRef<NotificationComponent> | null = null;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
-    private application: ApplicationRef,
-    private renderer: Renderer2
+    private application: ApplicationRef
   ) {}
 
   create(contentTemplate: string | TemplateRef<any>) {

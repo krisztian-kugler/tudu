@@ -3,16 +3,11 @@ import { ChangeDetectionStrategy, Component } from "@angular/core";
 import { RouterModule } from "@angular/router";
 
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
-import { ThemeService } from "./services/theme/theme.service";
-import { BrowserStorageService } from "./services/browser-storage/browser-storage.service";
-import { ModalService } from "./shared/features/modal/modal.service";
-import { NotificationService } from "./services/notification/notification.service";
 
 @Component({
   selector: "tudu-root",
   standalone: true,
   imports: [CommonModule, RouterModule, SidebarComponent],
-  providers: [ThemeService, BrowserStorageService, ModalService, NotificationService],
   template: `
     <tudu-sidebar />
     <header>Header</header>
