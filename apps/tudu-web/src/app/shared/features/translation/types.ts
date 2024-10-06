@@ -14,7 +14,7 @@ export type TranslationKeys<T> = T extends object
       }[keyof T]
   : never;
 
-export type TranslationSignal<T extends Record<string, unknown>> = Signal<T> & {
+export type TranslationSignal<T extends Record<string, unknown>> = {
   readonly [K in TranslationKeys<T>]: Signal<string> &
     ((interpolateParams: Record<string, unknown> | undefined) => string);
-};
+} & Signal<T>;
