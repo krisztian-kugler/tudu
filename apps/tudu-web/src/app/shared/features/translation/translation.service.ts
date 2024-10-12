@@ -10,8 +10,6 @@ type Translations = typeof translations;
 export const TranslationService = createTranslationService<Translations>({
   availableLanguages: ["en", "hu"],
   initialLanguage: "en",
-  fetchTranslations: (language: Language) => {
-    const http = inject(HttpClient);
-    return http.get<Translations>(`assets/translations/${language}.json`);
-  },
+  loadTranslations: (language: Language) =>
+    inject(HttpClient).get<Translations>(`assets/translations/${language}.json`),
 });
